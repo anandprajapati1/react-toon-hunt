@@ -10,7 +10,7 @@ const setInitialState = (s) => {
 };
 
 export const listReducer = (state = [], action) => {
-    if (Object.keys(ACTIONS_TYPE).indexOf(action.type)) {
+    if (Object.keys(ACTIONS_TYPE).indexOf(action.type) > -1) {
         if (!initialState.length) {
             setInitialState(state);
         }
@@ -19,13 +19,26 @@ export const listReducer = (state = [], action) => {
         switch (action.type) {
             // log
             case ACTIONS_TYPE.UPDATE_FILTER:
-                currentFilter[action.type] = currentFilter[action.type].concat(action.filterparam);
+                currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].concat(action.filterparam);
+                break;
+            case ACTIONS_TYPE.REMOVE_FILTER:
+                // console.log('remove filter', currentFilter[ACTIONS_TYPE.UPDATE_FILTER], action.filterparam[0]);
+
+                let test = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].map(x => {
+                    let i = x.value.indexOf(action.filterparam[0].value[0]);
+
+                    // console.log(x.key, action.filterparam[0].key, x.value);
+                    if (x.key === action.filterparam[0].key && i > -1) {
+                        x.value.splice(i, 1);
+                    }
+                    return x;
+                });
                 break;
             case ACTIONS_TYPE.SEARCH:
-                currentFilter[action.type] = action.searchKey;
+                currentFilter[ACTIONS_TYPE.SEARCH] = action.searchKey;
                 break;
             case ACTIONS_TYPE.SORT_BY_KEY:
-                currentFilter[action.type] = { key: action.key, order: action.order };
+                currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: action.key, order: action.order };
                 break;
             default:
                 //>>Reset filter
@@ -41,7 +54,7 @@ export const listReducer = (state = [], action) => {
             filteredData = Object.assign([], initialState);
             currentFilter[ACTIONS_TYPE.UPDATE_FILTER].forEach(p => {
                 let reg = new RegExp(p.value.join("|"), 'i');
-                filteredData = filteredData.filter(item => reg.test(item[p.key]));
+                filteredData = filteredData.filter(item => reg.test(item[p.key.toLowerCase()]));
             });
         }
 

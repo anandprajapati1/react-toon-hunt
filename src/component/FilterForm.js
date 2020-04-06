@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { searchQuery } from "../redux/actions";
 
-const FilterForm = (querySubmitted) => {
+const FilterForm = ({querySubmitted}) => {
     //>> Create state with name inputValue
     const [inputValue, setInputValue] = useState('');
 
@@ -18,7 +18,7 @@ const FilterForm = (querySubmitted) => {
                         if (inputValue) {
                             querySubmitted(inputValue)
                         }
-                        setInputValue('');
+                        // setInputValue('');
                     }} id="button-addon">Search</button>
                 </div>
             </div>
@@ -29,4 +29,4 @@ const FilterForm = (querySubmitted) => {
 const mapDispatchToProps = dispatch => ({
     querySubmitted: text => dispatch(searchQuery(text))
 })
-export default connect(mapDispatchToProps)(FilterForm);
+export default connect(null, mapDispatchToProps)(FilterForm);

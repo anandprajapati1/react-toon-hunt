@@ -2,6 +2,7 @@
 export const ACTIONS_TYPE = {
     SORT_BY_KEY: "SORT_BY_KEY",
     UPDATE_FILTER: "UPDATE_FILTER",
+    REMOVE_FILTER: "REMOVE_FILTER",
     SEARCH: "SEARCH"
 };
 export const SORT_ORDER = {
@@ -20,7 +21,11 @@ export const changeFilter = (f = [{ key: "", value: [""] }]) => ({
     type: ACTIONS_TYPE.UPDATE_FILTER,
     filterparam: f
 });
-export const searchQuery = (q = "") => ({
+export const removeFilter = (f = [{ key: "", value: [""] }]) => ({
+    type: ACTIONS_TYPE.REMOVE_FILTER,
+    filterparam: f
+});
+export const searchQuery = q => ({
     type: ACTIONS_TYPE.SEARCH,
     searchKey: q
 });
@@ -33,6 +38,10 @@ export const searchQuery = (q = "") => ({
 }
 {
     type: 'UPDATE_FILTER',
+    filterparam: [{key: 'gender', value: ["female"]}]
+}
+{
+    type: 'REMOVE_FILTER',
     filterparam: [{key: 'gender', value: ["female"]}]
 }
 {
