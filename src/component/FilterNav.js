@@ -5,7 +5,7 @@ import { changeFilter, removeFilter } from "../redux/actions";
 const FilterNav = ({ filterList, filterChanged, filterRemoved }) => {
 
     // const filterState = useState([{ key: "", value: [""] }]);
-    const filterState = useState({ key: filterList.filterType, value: filterList.list.map(x => { return { checked: false, value: x } }) });
+    const filterState = useState({ key: filterList.filterType, value: filterList.list.map(x => ({ checked: false, value: x })) });
     // console.log('hii', filterState[0]);
 
     return (
@@ -29,6 +29,19 @@ const FilterNav = ({ filterList, filterChanged, filterRemoved }) => {
             <style jsx="true">{`
                 .filter-box {
                     background: rgba(255,255,255,0.5);
+                    padding: 15px;
+                }
+                .filter-box ul {
+                    margin-bottom:0;
+                    padding-bottom: 15px;
+                    border-bottom: 1px solid gray;
+                }
+                .filter-box label {
+                    margin-bottom: 0;
+                    text-transform: capitalize;
+                }
+                .filter-box input[type=checkbox] {
+                    margin: 5px 5px 5px 0;
                 }
             `}</style>
         </div>
