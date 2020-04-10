@@ -15,9 +15,7 @@ const FilterForm = ({querySubmitted}) => {
                     aria-label="Search by name" aria-describedby="button-addon" />
                 <div className="input-group-append">
                     <button className="btn btn-primary" type="button" onClick={() => {
-                        if (inputValue) {
-                            querySubmitted(inputValue)
-                        }
+                        querySubmitted(inputValue)
                         // setInputValue('');
                     }} id="button-addon">Search</button>
                 </div>

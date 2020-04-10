@@ -5,6 +5,11 @@ export const ACTIONS_TYPE = {
     REMOVE_FILTER: "REMOVE_FILTER",
     SEARCH: "SEARCH"
 };
+export const FETCH_ACTIONS_TYPE = {
+    FETCH_PRODUCTS_PENDING: 'FETCH_PRODUCTS_PENDING',
+    FETCH_PRODUCTS_SUCCESS: 'FETCH_PRODUCTS_SUCCESS',
+    FETCH_PRODUCTS_ERROR: 'FETCH_PRODUCTS_ERROR'
+};
 export const SORT_ORDER = {
     ASC: "ASC",
     DESC: "DESC"
@@ -54,3 +59,17 @@ export const searchQuery = q => ({
     order: 'DESC'
 }
 */
+
+export const fetchProductsPending = () => ({
+    type: FETCH_ACTIONS_TYPE.FETCH_PRODUCTS_PENDING
+});
+
+export const fetchProductsSuccess = (results) => ({
+    type: FETCH_ACTIONS_TYPE.FETCH_PRODUCTS_SUCCESS,
+    results: results
+});
+
+export const fetchProductsError = (error) => ({
+    type: FETCH_ACTIONS_TYPE.FETCH_PRODUCTS_ERROR,
+    error: error
+});

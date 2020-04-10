@@ -1,89 +1,132 @@
-import { ACTIONS_TYPE, SORT_ORDER } from "./actions";
+import { ACTIONS_TYPE, FETCH_ACTIONS_TYPE, SORT_ORDER } from "./actions";
+import { filterType } from "../lib/constants";
 
-let initialState = [];
+const initialState = {
+    pending: false,
+    results: [],
+    error: null,
+    filters: []
+};
 let currentFilter = {};
 const setInitialState = (s) => {
-    initialState = [...s];
+    initialState.results = [...s];
     currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = [{ key: "", value: [""] }];
     currentFilter[ACTIONS_TYPE.SEARCH] = "";
     currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: "", order: "ASC" };
 };
 
-export const listReducer = (state = [], action) => {
-    if (Object.keys(ACTIONS_TYPE).indexOf(action.type) > -1) {
-        if (!initialState.length) {
-            setInitialState(state);
-        }
 
-        //PREPARE FILTER STATE
-        switch (action.type) {
-            // log
-            case ACTIONS_TYPE.UPDATE_FILTER:
+export const productsReducer = (state = initialState, action) => {
+    switch (action.type) {
+        case FETCH_ACTIONS_TYPE.FETCH_PRODUCTS_PENDING:
+            return {
+                ...state,
+                pending: true
+            };
+        case FETCH_ACTIONS_TYPE.FETCH_PRODUCTS_SUCCESS:
+            setInitialState(action.results);
+            return {
+                ...state,
+                pending: false,
+                results: action.results
+            };
+        case FETCH_ACTIONS_TYPE.FETCH_PRODUCTS_ERROR:
+            return {
+                ...state,
+                pending: false,
+                error: action.error
+            };
+        case ACTIONS_TYPE.UPDATE_FILTER: {
+            let _f = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].filter(x => x.key === action.filterparam[0].key);
+            if (_f.length) {
+                if (_f[0].value.indexOf(action.filterparam[0].value[0]) === -1) {
+                    _f[0].value = [..._f[0].value, action.filterparam[0].value[0]];
+                }
+            } else {
                 currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].concat(action.filterparam);
-                break;
-            case ACTIONS_TYPE.REMOVE_FILTER:
-                // console.log('remove filter', currentFilter[ACTIONS_TYPE.UPDATE_FILTER], action.filterparam[0]);
-
-                let test = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].map(x => {
-                    let i = x.value.indexOf(action.filterparam[0].value[0]);
-
-                    // console.log(x.key, action.filterparam[0].key, x.value);
-                    if (x.key === action.filterparam[0].key && i > -1) {
-                        x.value.splice(i, 1);
-                    }
-                    return x;
-                });
-                break;
-            case ACTIONS_TYPE.SEARCH:
-                currentFilter[ACTIONS_TYPE.SEARCH] = action.searchKey;
-                break;
-            case ACTIONS_TYPE.SORT_BY_KEY:
-                currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: action.key, order: action.order };
-                break;
-            default:
-                //>>Reset filter
-                setInitialState(initialState);
-                break;
+            }
+            break;
         }
+        case ACTIONS_TYPE.REMOVE_FILTER:
+            currentFilter[ACTIONS_TYPE.UPDATE_FILTER].map(x => {
+                let i = x.value.indexOf(action.filterparam[0].value[0]);
 
-        //>> INITIAL state of DATA
-        let filteredData = Object.assign([], initialState);
-
-        //PEROFRM FILTER here
-        if (currentFilter[ACTIONS_TYPE.UPDATE_FILTER].length) {
-            filteredData = Object.assign([], initialState);
-            currentFilter[ACTIONS_TYPE.UPDATE_FILTER].forEach(p => {
-                let reg = new RegExp(p.value.join("|"), 'i');
-                filteredData = filteredData.filter(item => reg.test(item[p.key.toLowerCase()]));
+                if (x.key === action.filterparam[0].key && i > -1) {
+                    x.value.splice(i, 1);
+                }
+                return x;
             });
-        }
-
-        //PERFORM SEARCH here
-        let reg = new RegExp(currentFilter[ACTIONS_TYPE.SEARCH], 'i');
-        filteredData = filteredData.filter(item => reg.test(item.name));
-
-        //Perform sort
-        //>> Default sort ASCENDING
-        switch (currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key) {
-            case "DATE":
-                filteredData = filteredData.sort((a, b) => Date.parse(a.created) - Date.parse(b.created));
-                break;
-            case "name":
-                filteredData = filteredData.sort((a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1);
-                break;
-            case "id":
-                filteredData = filteredData.sort((a, b) => a.id - b.id);
-                break;
-            default:
-                break;
-        }
-
-        if (currentFilter[ACTIONS_TYPE.SORT_BY_KEY].order === SORT_ORDER.DESC) {
-            filteredData = filteredData.reverse();
-        }
-        // console.log("sort by", currentFilter);
-
-        return filteredData;
+            break;
+        case ACTIONS_TYPE.SEARCH:
+            currentFilter[ACTIONS_TYPE.SEARCH] = action.searchKey;
+            break;
+        case ACTIONS_TYPE.SORT_BY_KEY:
+            currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: action.key, order: action.order };
+            break;
+        default:
+            return state;
     }
-    return state;
+
+    //>> INITIAL state of DATA
+    let filteredData = Object.assign([], initialState.results);
+
+    //PEROFRM FILTER here
+    if (currentFilter[ACTIONS_TYPE.UPDATE_FILTER].length) {
+        // filteredData = Object.assign([], initialState.results);
+        currentFilter[ACTIONS_TYPE.UPDATE_FILTER].forEach(p => {
+            let reg = new RegExp(p.value.join("|"), 'i');
+            filteredData = filteredData.filter(item => reg.test(item[p.key.toLowerCase()]));
+        });
+    }
+
+    //PERFORM SEARCH here
+    let reg = new RegExp(currentFilter[ACTIONS_TYPE.SEARCH], 'i');
+    filteredData = filteredData.filter(item => reg.test(item.name));
+
+    //Perform sort
+    //>> Default sort ASCENDING
+    console.log(currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key);
+    switch (currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key) {
+        case "DATE":
+            filteredData = filteredData.sort((a, b) => Date.parse(a.created) - Date.parse(b.created));
+            break;
+        case "name":
+            filteredData = filteredData.sort((a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1);
+            break;
+        case "id":
+            filteredData = filteredData.sort((a, b) => a.id - b.id);
+            break;
+        default:
+            break;
+    }
+
+    if (currentFilter[ACTIONS_TYPE.SORT_BY_KEY].order === SORT_ORDER.DESC) {
+        filteredData = filteredData.reverse();
+    }
+
+    state.results = Object.assign([], filteredData);
+    return {
+        ...state,
+        pending: false
+    };
 };
+
+export const getProducts = state => state.productsReducer.results;
+export const getProductsPending = state => state.productsReducer.pending;
+export const getProductsError = state => state.productsReducer.error;
+export const getFilters = () => {
+    return [
+        {
+            filterType: filterType.SPECIES,
+            list: [...new Set(initialState.results.map(x => x.species))]
+        },
+        {
+            filterType: filterType.GENDER,
+            list: [...new Set(initialState.results.map(x => x.gender))]
+        },
+        {
+            filterType: filterType.ORIGIN,
+            list: [...new Set(initialState.results.map(x => x.origin.name))]
+        }
+    ];
+}

@@ -1,34 +1,36 @@
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import logo from './logo.svg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import fetchProductsAction from './redux/fetchProducts';
+import { getProductsError, getProducts, getProductsPending, getFilters } from './redux/reducers';
+import { changeFilter, removeFilter } from "./redux/actions";
 import { filterType } from "./lib/constants";
 import FilterNav from './component/FilterNav';
 import FilterCloud from './component/FilterCloud';
 import FilterForm from './component/FilterForm';
 import { ToonList } from './component/ToonList';
-import { connect } from 'react-redux';
 
 class App extends Component {
-  getFilters() {
-    return [
-      {
-        filterType: filterType.SPECIES,
-        list: [...new Set(this.props.initialToonsData.map(x => x.species))]
-      },
-      {
-        filterType: filterType.GENDER,
-        list: [...new Set(this.props.initialToonsData.map(x => x.gender))]
-      },
-      {
-        filterType: filterType.ORIGIN,
-        list: [...new Set(this.props.initialToonsData.map(x => x.origin.name))]
-      }
-    ];
+  constructor(props) {
+    super(props);
+
+    this.shouldComponentRender = this.shouldComponentRender.bind(this);
+  }
+  componentWillMount() {
+    const { fetchProducts } = this.props;
+    fetchProducts();
+  }
+
+  shouldComponentRender() {
+    return !this.props.pending;
   }
 
   render() {
-    const initialFilterCloud = [{ label: "filter 1", value: "filter 1" }, { label: "filter 2", value: "filter 2" }]
+    const { initialToonsData, error, filters } = this.props;
+    const initialFilterCloud = [{ label: "filter 1", value: "filter 1" }, { label: "filter 2", value: "filter 2" }];
 
     return (
       <div className="App">
@@ -41,12 +43,13 @@ class App extends Component {
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-3">
-              {this.getFilters().map((f, i) => <FilterNav filterList={f} key={i} />)}
+              {filters.map((f, i) => <FilterNav filterList={f} key={i} onFilterChanged={this.props.fetchProductsOnFilterUpdate} onFilterRemoved={this.props.fetchProductsOnFilterRemoved} />)}
             </div>
             <div className="col-md-9">
               <FilterCloud filters={initialFilterCloud} />
               <FilterForm />
-              <ToonList toonsData={this.props.initialToonsData} />
+              {this.shouldComponentRender() && initialToonsData ? <ToonList toonsData={initialToonsData} /> : <div className="loader">LOADING...</div>}
+              {error && <span className='toon-list-error'>{error}</span>}
             </div>
           </div>
         </div>
@@ -105,7 +108,16 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
-  initialToonsData: state.listReducer
+  // initialToonsData: state.listReducer,
+  error: getProductsError(state),
+  initialToonsData: getProducts(state),
+  pending: getProductsPending(state),
+  filters: getFilters(state),
 })
+const mapDispatchToProps = dispatch => bindActionCreators({
+  fetchProducts: fetchProductsAction,
+  fetchProductsOnFilterUpdate: changeFilter,
+  fetchProductsOnFilterRemoved: removeFilter
+}, dispatch)
 
-export default connect(mapStateToProps)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(App)

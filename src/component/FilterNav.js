@@ -1,25 +1,25 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
-import { changeFilter, removeFilter } from "../redux/actions";
+// import { connect } from "react-redux";
+// import { changeFilter, removeFilter } from "../redux/actions";
 
-const FilterNav = ({ filterList, filterChanged, filterRemoved }) => {
+const FilterNav = ({ filterList, onFilterChanged, onFilterRemoved }) => {
 
-    // const filterState = useState([{ key: "", value: [""] }]);
-    const filterState = useState({ key: filterList.filterType, value: filterList.list.map(x => ({ checked: false, value: x })) });
-    // console.log('hii', filterState[0]);
+    let filterState = { key: filterList.filterType, value: filterList.list.map(x => ({ checked: false, value: x })) };
+    // let filterState = useState({ key: filterList.filterType, value: filterList.list.map(x => ({ checked: false, value: x })) });
+    console.log('hii', filterList);
 
     return (
         <div className="filter-box">
-            <h3>{filterState[0].key}</h3>
+            <h3>{filterState.key}</h3>
             <ul>
-                {filterState[0].value.map(f => <li key={filterState[0].key + "_" + f.value}>
+                {filterState.value.map(f => <li key={filterState.key + "_" + f.value}>
                     <label>
-                        <input type="checkbox" name={filterState[0].key + "_" + f.value} onChange={(e) => {
+                        <input type="checkbox" name={filterState.key + "_" + f.value} onChange={(e) => {
                             f.checked = e.target.checked;
                             if (e.target.checked) {
-                                filterChanged([{ key: filterState[0].key, value: [f.value] }])
+                                onFilterChanged([{ key: filterState.key, value: [f.value] }])
                             } else {
-                                filterRemoved([{ key: filterState[0].key, value: [f.value] }])
+                                onFilterRemoved([{ key: filterState.key, value: [f.value] }])
                             }
                         }} />{f.value}
                     </label>
@@ -48,8 +48,9 @@ const FilterNav = ({ filterList, filterChanged, filterRemoved }) => {
     )
 }
 
-const mapDispatchToProps = dispatch => ({
-    filterChanged: _filterPar => dispatch(changeFilter(_filterPar)),
-    filterRemoved: _filterPar => dispatch(removeFilter(_filterPar))
-})
-export default connect(null, mapDispatchToProps)(FilterNav);
+// const mapDispatchToProps = dispatch => ({
+//     filterChanged: _filterPar => dispatch(changeFilter(_filterPar)),
+//     filterRemoved: _filterPar => dispatch(removeFilter(_filterPar))
+// })
+// export default connect(null, mapDispatchToProps)(FilterNav);
+export default FilterNav;
