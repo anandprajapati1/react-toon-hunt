@@ -5,9 +5,8 @@ import logo from './logo.svg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import fetchProductsAction from './redux/fetchProducts';
-import { getProductsError, getProducts, getProductsPending, getFilters } from './redux/reducers';
-import { changeFilter, removeFilter } from "./redux/actions";
-import { filterType } from "./lib/constants";
+import { getProductsError, getProducts, getProductsPending, getFilters, getCurrentFilters } from './redux/reducers';
+import { changeFilter, removeFilter, ACTIONS_TYPE } from "./redux/actions";
 import FilterNav from './component/FilterNav';
 import FilterCloud from './component/FilterCloud';
 import FilterForm from './component/FilterForm';
@@ -29,8 +28,8 @@ class App extends Component {
   }
 
   render() {
-    const { initialToonsData, error, filters } = this.props;
-    const initialFilterCloud = [{ label: "filter 1", value: "filter 1" }, { label: "filter 2", value: "filter 2" }];
+    const { initialToonsData, error, filters, currentFilters } = this.props;
+    // const initialFilterCloud = [{ label: "filter 1", value: "filter 1" }, { label: "filter 2", value: "filter 2" }];
 
     return (
       <div className="App">
@@ -46,7 +45,8 @@ class App extends Component {
               {filters.map((f, i) => <FilterNav filterList={f} key={i} onFilterChanged={this.props.fetchProductsOnFilterUpdate} onFilterRemoved={this.props.fetchProductsOnFilterRemoved} />)}
             </div>
             <div className="col-md-9">
-              <FilterCloud filters={initialFilterCloud} />
+              <FilterCloud onFilterRemoved={this.props.fetchProductsOnFilterRemoved}
+                filters={currentFilters[ACTIONS_TYPE.UPDATE_FILTER] && currentFilters[ACTIONS_TYPE.UPDATE_FILTER].length ? currentFilters[ACTIONS_TYPE.UPDATE_FILTER] : []} />
               <FilterForm />
               {this.shouldComponentRender() && initialToonsData ? <ToonList toonsData={initialToonsData} /> : <div className="loader">LOADING...</div>}
               {error && <span className='toon-list-error'>{error}</span>}
@@ -113,6 +113,7 @@ const mapStateToProps = state => ({
   initialToonsData: getProducts(state),
   pending: getProductsPending(state),
   filters: getFilters(state),
+  currentFilters: getCurrentFilters(state)
 })
 const mapDispatchToProps = dispatch => bindActionCreators({
   fetchProducts: fetchProductsAction,

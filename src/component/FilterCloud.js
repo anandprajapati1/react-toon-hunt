@@ -1,30 +1,28 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class FilterCloud extends Component {
-    render() {
-        return (
-            <div className="filter-cloud">
-                <ul>
-                    {this.props.filters.map((f, i) =>
-                        <li className="filter-item" key={i}>
-                            <a>{f.label}</a>
-                        </li>
-                    )}
-                </ul>
-                <style jsx="true">{`
-                    .filter-cloud ul {
-                        display: flex;
+const FilterCloud = ({ filters, onFilterRemoved }) => {
+    return (
+        <div className="filter-cloud">
+            <ul>
+                {filters.map((f, i) => {
+                    if (f.key) {
+                        return f.value.map(v => <li className="filter-item" key={`${i}_${v}`}>
+                            <button class="btn btn-outline-success btn-sm" title={`Remove filter: ${v}`}
+                                onClick={() => { onFilterRemoved([{ key: f.key, value: [v] }]); return false; }}>{v}</button>
+                        </li>)
                     }
-                    .filter-cloud li a{
-                        background: rgba(255, 0, 255, 0.5);
-                        padding: 5px 10px;
-                        margin-right: 10px;
-                    }
-                
-                `}</style>
-            </div>
-        );
-    }
+                })}
+            </ul>
+            <style jsx="true">{`
+                .filter-cloud ul li{
+                    display: inline-block;
+                }
+                .filter-cloud li button {
+                    margin-right: 10px;
+                }
+            `}</style>
+        </div>
+    );
 }
 
 export default FilterCloud;

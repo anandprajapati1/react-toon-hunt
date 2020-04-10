@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-// import { connect } from "react-redux";
-// import { changeFilter, removeFilter } from "../redux/actions";
+import React from "react";
 
 const FilterNav = ({ filterList, onFilterChanged, onFilterRemoved }) => {
 
     let filterState = { key: filterList.filterType, value: filterList.list.map(x => ({ checked: false, value: x })) };
-    // let filterState = useState({ key: filterList.filterType, value: filterList.list.map(x => ({ checked: false, value: x })) });
     console.log('hii', filterList);
 
     return (
@@ -48,9 +45,4 @@ const FilterNav = ({ filterList, onFilterChanged, onFilterRemoved }) => {
     )
 }
 
-// const mapDispatchToProps = dispatch => ({
-//     filterChanged: _filterPar => dispatch(changeFilter(_filterPar)),
-//     filterRemoved: _filterPar => dispatch(removeFilter(_filterPar))
-// })
-// export default connect(null, mapDispatchToProps)(FilterNav);
 export default FilterNav;

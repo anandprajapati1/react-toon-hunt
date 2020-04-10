@@ -5,14 +5,15 @@ const initialState = {
     pending: false,
     results: [],
     error: null,
-    filters: []
+    filters: [],
+    currentFilter: {}
 };
-let currentFilter = {};
+// let currentFilter = {};
 const setInitialState = (s) => {
     initialState.results = [...s];
-    currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = [{ key: "", value: [""] }];
-    currentFilter[ACTIONS_TYPE.SEARCH] = "";
-    currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: "", order: "ASC" };
+    initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = [{ key: "", value: [""] }];
+    initialState.currentFilter[ACTIONS_TYPE.SEARCH] = "";
+    initialState.currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: "", order: "ASC" };
 };
 
 
@@ -37,18 +38,18 @@ export const productsReducer = (state = initialState, action) => {
                 error: action.error
             };
         case ACTIONS_TYPE.UPDATE_FILTER: {
-            let _f = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].filter(x => x.key === action.filterparam[0].key);
+            let _f = initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER].filter(x => x.key === action.filterparam[0].key);
             if (_f.length) {
                 if (_f[0].value.indexOf(action.filterparam[0].value[0]) === -1) {
                     _f[0].value = [..._f[0].value, action.filterparam[0].value[0]];
                 }
             } else {
-                currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = currentFilter[ACTIONS_TYPE.UPDATE_FILTER].concat(action.filterparam);
+                initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER] = initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER].concat(action.filterparam);
             }
             break;
         }
         case ACTIONS_TYPE.REMOVE_FILTER:
-            currentFilter[ACTIONS_TYPE.UPDATE_FILTER].map(x => {
+            initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER].map(x => {
                 let i = x.value.indexOf(action.filterparam[0].value[0]);
 
                 if (x.key === action.filterparam[0].key && i > -1) {
@@ -58,10 +59,10 @@ export const productsReducer = (state = initialState, action) => {
             });
             break;
         case ACTIONS_TYPE.SEARCH:
-            currentFilter[ACTIONS_TYPE.SEARCH] = action.searchKey;
+            initialState.currentFilter[ACTIONS_TYPE.SEARCH] = action.searchKey;
             break;
         case ACTIONS_TYPE.SORT_BY_KEY:
-            currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: action.key, order: action.order };
+            initialState.currentFilter[ACTIONS_TYPE.SORT_BY_KEY] = { key: action.key, order: action.order };
             break;
         default:
             return state;
@@ -71,22 +72,22 @@ export const productsReducer = (state = initialState, action) => {
     let filteredData = Object.assign([], initialState.results);
 
     //PEROFRM FILTER here
-    if (currentFilter[ACTIONS_TYPE.UPDATE_FILTER].length) {
+    if (initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER].length) {
         // filteredData = Object.assign([], initialState.results);
-        currentFilter[ACTIONS_TYPE.UPDATE_FILTER].forEach(p => {
+        initialState.currentFilter[ACTIONS_TYPE.UPDATE_FILTER].forEach(p => {
             let reg = new RegExp(p.value.join("|"), 'i');
             filteredData = filteredData.filter(item => reg.test(item[p.key.toLowerCase()]));
         });
     }
 
     //PERFORM SEARCH here
-    let reg = new RegExp(currentFilter[ACTIONS_TYPE.SEARCH], 'i');
+    let reg = new RegExp(initialState.currentFilter[ACTIONS_TYPE.SEARCH], 'i');
     filteredData = filteredData.filter(item => reg.test(item.name));
 
     //Perform sort
     //>> Default sort ASCENDING
-    console.log(currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key);
-    switch (currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key) {
+    console.log(initialState.currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key);
+    switch (initialState.currentFilter[ACTIONS_TYPE.SORT_BY_KEY].key) {
         case "DATE":
             filteredData = filteredData.sort((a, b) => Date.parse(a.created) - Date.parse(b.created));
             break;
@@ -100,7 +101,7 @@ export const productsReducer = (state = initialState, action) => {
             break;
     }
 
-    if (currentFilter[ACTIONS_TYPE.SORT_BY_KEY].order === SORT_ORDER.DESC) {
+    if (initialState.currentFilter[ACTIONS_TYPE.SORT_BY_KEY].order === SORT_ORDER.DESC) {
         filteredData = filteredData.reverse();
     }
 
@@ -130,3 +131,4 @@ export const getFilters = () => {
         }
     ];
 }
+export const getCurrentFilters = () => initialState.currentFilter;
